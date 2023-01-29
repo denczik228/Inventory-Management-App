@@ -20,11 +20,13 @@ const registerUser = asyncHandler(
             res.status(400);
             throw new Error("Email has already exist");
         }
+
+       
         //creating of a new user
         const user = await User.create({
             name,
             email,
-            password
+            password,
         })
         if (user) {
             const { _id, name, email, bio, photo, phone } = user;
