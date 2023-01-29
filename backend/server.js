@@ -7,12 +7,16 @@ const mongoose = require("mongoose");
 const userRoute = require("./routes/userRoute.js"); 
 const errorHandler = require("./middleWare/errorMiddleware.js");
 
+const cookieParser = require("cookie-parser");
+
 const app = express();
 
 //middlewares
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 
 //routes middleware
 app.use("/api/users", userRoute);
@@ -38,4 +42,4 @@ mongoose
     })
     .catch((err) => {
         console.log(err);
-        })
+})
