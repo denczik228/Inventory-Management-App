@@ -148,14 +148,31 @@ const getUser = asyncHandler(async (req, res) => {
 });
 
 //get login status
-const loginStatus = asyncHandler(async (req, res)=>{
-  res.send("login stat");
-})
+const loginStatus = asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.json(false);
+  }
+  //verify token
+  const verified = jwt.verify(token, process.env.JWT_SECRET);
+  if (verified) {
+    return res.json(true)
+  } else {
+    return res.json(false)
+  }
+});
+
+//update user
+
+const updateUser = asyncHandler(async (req, res) => {
+  res.send("updating data of user")
+});
 
 module.exports = {
     registerUser,
     loginUser,
     logout,
   getUser,
-    loginStatus
+  loginStatus,
+    updateUser,
 }
