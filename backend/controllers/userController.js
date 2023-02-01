@@ -93,13 +93,15 @@ const loginUser = asyncHandler(async (req, res) => {
   //generate token
   const token = generateToken(user._id);
   //sending http-only cookie
-  res.cookie("token", token, {
-    path: "/",
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 86400), //1 day
-    sameSite: "none",
-    secure: true,
-  });
+  if (passwordIsCorrect) {
+    res.cookie("token", token, {
+      path: "/",
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000 * 86400), //1 day
+      sameSite: "none",
+      secure: true,
+    });
+  }
 
   if (user && passwordIsCorrect) {
     const { _id, name, email, bio, photo, phone } = user;
@@ -109,7 +111,7 @@ const loginUser = asyncHandler(async (req, res) => {
       email,
       bio,
       photo,
-        phone,
+      phone,
       token,
     });
   } else {
@@ -119,7 +121,6 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 //logout of user
-
 const logout = asyncHandler(async (req, res) => {
    res.cookie("token", "", {
      path: "/",
@@ -166,7 +167,6 @@ const loginStatus = asyncHandler(async (req, res) => {
 });
 
 //update user
-
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
@@ -180,11 +180,11 @@ const updateUser = asyncHandler(async (req, res) => {
     const updatedUser = await user.save();
     res.status(200).json({
       _id: updatedUser._id,
-      name: updatedUser._name,
-      email: updatedUser._email,
-      bio: updatedUser._bio,
-      photo: updatedUser._photo,
-      phone: updatedUser._phone,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      bio: updatedUser.bio,
+      photo: updatedUser.photo,
+      phone: updatedUser.phone,
     });
   } else {
     res.status(404)
@@ -290,20 +290,21 @@ const resetPassword = asyncHandler(async (req, res) => {
   //find token in db
   const userToken = await Token.findOne({
     token: hashedToken,
-    expiresAt:{$gt:Date.now()}
+    expiresAt: { $gt: Date.now() }
   })
   if (!userToken) {
     res.status(404);
     throw new Error("Invalid or Expired token")
   }
+
   //find user
   const user = await User.findOne({
-    _id:userToken.userId
+    _id: userToken.userId
   })
   user.password = password
   await user.save()
-  res.status(200).json({message:"Password reset succesfully"})
-})
+  res.status(200).json({ message: "Password reset succesfully" })
+});
 
 module.exports = {
     registerUser,
