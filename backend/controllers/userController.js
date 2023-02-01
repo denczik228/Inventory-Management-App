@@ -226,7 +226,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     throw new Error("User does not exist");
   }
   
-//delete token if it exist in db
+  //delete token if it exist in db
   let token = await Token.findOne({ userId: user._id })
   if (token) {
     await token.deleteOne()
@@ -263,17 +263,46 @@ const forgotPassword = asyncHandler(async (req, res) => {
   <p>DTeam</p>
   `;
 
-  const subject="Password Reset Request"
+  const subject = "Password Reset Request"
   const send_to = user.email;
   const sent_from = proces.env.EMAIL_USER;
 
   try {
     await sendEmail(subject, message, send_to, sent_from)
     res.status(200).json({ success: true, message: "Reset email sent" })
-  } catch(err) {
+  } catch (err) {
     res.status(500)
     throw new Error("Email wasnt sent, please try again");
   };
+});
+
+//reset password
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  const { resetToken } = req.params;
+
+  //hash token and then compare to token in db
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  
+  //find token in db
+  const userToken = await Token.findOne({
+    token: hashedToken,
+    expiresAt:{$gt:Date.now()}
+  })
+  if (!userToken) {
+    res.status(404);
+    throw new Error("Invalid or Expired token")
+  }
+  //find user
+  const user = await User.findOne({
+    _id:userToken.userId
+  })
+  user.password = password
+  await user.save()
+  res.status(200).json({message:"Password reset succesfully"})
 })
 
 module.exports = {
@@ -285,4 +314,5 @@ module.exports = {
     updateUser,
     changePassword,
     forgotPassword,
+    resetPassword,
 }
