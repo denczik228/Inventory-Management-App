@@ -213,15 +213,19 @@ const changePassword = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Old password is incorrect");
   }
+});
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  
 })
 
 module.exports = {
     registerUser,
     loginUser,
     logout,
-  getUser,
-  loginStatus,
-  updateUser,
+    getUser,
+    loginStatus,
+    updateUser,
     changePassword,
+    forgotPassword,
 }
